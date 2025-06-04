@@ -29,6 +29,7 @@ form .new-todo{
     margin: 20px 0;
 }
 #new-todo{
+    width: 60%;
     padding: 12px;
     border: none;
     border-radius: 5px;
@@ -63,6 +64,9 @@ form .task-list .task-item .right a {
     color: red;
 }
 
+form .task-list .task-item .right a:hover {
+    color: hsl(220.4deg 82.11% 51.76%);
+}
 /* Line  */
 #todo-list .line {
     width: 80%;
