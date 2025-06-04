@@ -43,7 +43,10 @@ form .new-todo .add-btn {
     color: #000;
     cursor: pointer;
 }
-
+form .new-todo .add-btn:hover {
+    background-color: #fff;
+    color: #000;
+}
 form .task-list {
     margin: 20px 0;
     
@@ -65,7 +68,7 @@ form .task-list .task-item .right a {
 }
 
 form .task-list .task-item .right a:hover {
-    color: hsl(220.4deg 82.11% 51.76%);
+    color: #fff;
 }
 /* Line  */
 #todo-list .line {
