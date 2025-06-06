@@ -43,6 +43,7 @@ form .new-todo .add-btn {
     background-color: hsl(220.4deg 82.11% 51.76%);
     color: #000;
     cursor: pointer;
+    font-weight: bold;
 }
 form .new-todo .add-btn:hover {
     background-color: #fff;
@@ -62,13 +63,18 @@ form .task-list .task-item{
     border-radius: 5px;
     
 }
-form .task-list .task-item .right a {
+form .task-list .task-item .right .delete-btn,
+form .task-list .task-item .right .edit-btn {
     margin: 0 5px;
     text-decoration: none;
     color: red;
+    border: none;
+    background: none;
+    cursor: pointer;
 }
 
-form .task-list .task-item .right a:hover {
+form .task-list .task-item .right .delete-btn:hover,
+form .task-list .task-item .right .edit-btn:hover {
     color: #fff;
 }
 /* Line  */
