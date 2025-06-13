@@ -5,23 +5,55 @@ document.addEventListener('DOMContentLoaded', () => {
     const completedSpan = document.querySelector('.completed');
     const uncompletedSpan = document.querySelector('.uncompleted');
     const addBtn = document.querySelector('.add-btn');
-    let taskIdCounter = 1;
 
-// Hàm cập nhật số lượng task đã hoàn thành và chưa hoàn thành
+    // --- 2. Khai báo biến trạng thái ---
+    // Sử dụng một mảng để lưu trữ các task. Mỗi task là một đối tượng.
+    let tasks = [];
+    let taskIdCounter = 1; 
+
+    // --- 3. Helper functions ---
+
+    // Hàm lưu trữ tasks vào localStorage
+    const saveTasksToLocalStorage = () => {
+        localStorage.setItem('todoTasks', JSON.stringify(tasks));
+    };
+
+    // Hàm tải tasks từ localStorage
+    const loadTasksFromLocalStorage = () => {
+        const storedTasks = localStorage.getItem('todoTasks');
+        if (storedTasks) {
+            tasks = JSON.parse(storedTasks);
+            // Cập nhật taskIdCounter để tránh trùng lặp ID khi thêm task mới
+            // Tìm ID lớn nhất hiện có và tăng lên 1
+            if (tasks.length > 0) {
+                taskIdCounter = Math.max(...tasks.map(task => task.id)) + 1;
+            } else {
+                taskIdCounter = 1;
+            }
+            // Render lại các task từ dữ liệu đã tải
+            tasks.forEach(task => {
+                const taskItem = createTaskItem(task.text, task.isCompleted, task.id); 
+                taskListDiv.appendChild(taskItem);
+            });
+        }
+    };
+
+    // Hàm cập nhật số lượng task đã hoàn thành và chưa hoàn thành
     const updateTaskCounts = () => {
-        const completedTasks = taskListDiv.querySelectorAll('.task-item input[type="checkbox"]:checked').length;
-        const totalTasks = taskListDiv.querySelectorAll('.task-item').length;
+        const completedTasks = tasks.filter(task => task.isCompleted).length;
+        const totalTasks = tasks.length;
         const uncompletedTasks = totalTasks - completedTasks;
 
         completedSpan.textContent = completedTasks;
         uncompletedSpan.textContent = uncompletedTasks;
     };
 
-// Hàm tạo một task item mới và gắn các sự kiện riêng của nó (xóa, sửa, checkbox)
-    const createTaskItem = (text, isCompleted = false) => {
+    // Hàm tạo một task item mới và gắn các sự kiện riêng của nó (xóa, sửa, checkbox)
+    // Thêm tham số `id` để có thể tái tạo task với ID đã lưu
+    const createTaskItem = (text, isCompleted = false, id = taskIdCounter) => {
         const taskItem = document.createElement('div');
         taskItem.classList.add('task-item');
-        taskItem.dataset.id = taskIdCounter++; // Gán một ID cho mỗi task
+        taskItem.dataset.id = id;
 
         taskItem.innerHTML = `
             <div class="left">
@@ -34,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
 
-// Gắn sự kiện cho checkbox (đánh dấu hoàn thành/chưa hoàn thành)
+        // Gắn sự kiện cho checkbox (đánh dấu hoàn thành/chưa hoàn thành)
         const checkbox = taskItem.querySelector('input[type="checkbox"]');
         checkbox.addEventListener('change', (event) => {
             const label = taskItem.querySelector('label');
@@ -45,13 +77,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 label.style.textDecoration = 'none';
                 label.style.opacity = '1';
             }
+            // Cập nhật trạng thái isCompleted trong mảng tasks
+            const taskId = parseInt(taskItem.dataset.id);
+            const taskIndex = tasks.findIndex(task => task.id === taskId);
+            if (taskIndex !== -1) {
+                tasks[taskIndex].isCompleted = event.target.checked;
+                saveTasksToLocalStorage(); 
+            }
             updateTaskCounts();
         });
 
         // Gắn sự kiện cho nút xóa
         const deleteButton = taskItem.querySelector('.delete-btn');
         deleteButton.addEventListener('click', () => {
+            const taskId = parseInt(taskItem.dataset.id);
+            tasks = tasks.filter(task => task.id !== taskId); 
             taskItem.remove();
+            saveTasksToLocalStorage();
             updateTaskCounts();
         });
 
@@ -121,16 +163,22 @@ document.addEventListener('DOMContentLoaded', () => {
             // Hàm xử lý khi nhấn Save
             const saveEdit = () => {
                 const newText = editInput.value.trim();
-                if (newText !== '') { // Chỉ cập nhật nếu có nội dung mới không rỗng
-                    label.textContent = newText;
+                if (newText !== '') {
+                    label.textContent = newText; 
+                    // Cập nhật nội dung trong mảng tasks
+                    const taskId = parseInt(taskItem.dataset.id);
+                    const taskIndex = tasks.findIndex(task => task.id === taskId);
+                    if (taskIndex !== -1) {
+                        tasks[taskIndex].text = newText;
+                        saveTasksToLocalStorage();
+                    }
                 }
-                finishEditing(); // Kết thúc chỉnh sửa
+                finishEditing();
             };
 
             // Hàm xử lý khi nhấn Cancel
             const cancelEdit = () => {
-                // Không cập nhật label.textContent, chỉ khôi phục trạng thái
-                finishEditing(); // Kết thúc chỉnh sửa
+                finishEditing();
             };
 
             // Lắng nghe sự kiện click cho nút Save
@@ -150,19 +198,36 @@ document.addEventListener('DOMContentLoaded', () => {
         return taskItem;
     };
 
-    // Xử lý sự kiện khi submit form (chỉ khi nhấn nút Add hoặc Enter trong ô input thêm task)
+    // --- 4. Định nghĩa các trình xử lý sự kiện (event listeners) ---
+
+    // Xử lý sự kiện khi submit form (thêm task mới)
     todoForm.addEventListener('submit', (event) => {
         event.preventDefault(); 
 
         const taskText = newTodoInput.value.trim();
 
-        if (taskText) {
-            const newTaskItem = createTaskItem(taskText);
+        if (taskText) { 
+            const newTask = {
+                id: taskIdCounter, 
+                text: taskText,
+                isCompleted: false
+            };
+            tasks.push(newTask); 
+            saveTasksToLocalStorage(); 
+
+            const newTaskItem = createTaskItem(newTask.text, newTask.isCompleted, newTask.id); 
             taskListDiv.appendChild(newTaskItem);
-            newTodoInput.value = '';
-            updateTaskCounts();
+            taskIdCounter++; // Tăng ID cho task tiếp theo
+
+            newTodoInput.value = ''; 
+            updateTaskCounts(); 
         }
     });
 
+    // --- 5. Khởi tạo ứng dụng ---
+
+    // Tải các task từ localStorage khi ứng dụng khởi động
+    loadTasksFromLocalStorage();
+    // Cập nhật số lượng task ban đầu (dựa trên dữ liệu đã tải)
     updateTaskCounts();
 });
