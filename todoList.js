@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const completedSpan = document.querySelector('.completed');
     const uncompletedSpan = document.querySelector('.uncompleted');
     const addBtn = document.querySelector('.add-btn');
+    const checkAll = document.getElementById('check-all');
+    const deleteSelect = document.getElementById('delete-select');
 
     // --- 2. Khai báo biến trạng thái ---
     // Sử dụng một mảng để lưu trữ các task. Mỗi task là một đối tượng.
@@ -223,9 +225,46 @@ document.addEventListener('DOMContentLoaded', () => {
             updateTaskCounts(); 
         }
     });
+    checkAll.addEventListener('change', () => {
+        const isChecked = checkAll.checked;
 
-    // --- 5. Khởi tạo ứng dụng ---
+        // Cập nhật trạng thái các task
+        tasks = tasks.map(task => ({ ...task, isCompleted: isChecked }));
 
+        // Lưu và cập nhật lại giao diện
+        saveTasksToLocalStorage();
+
+        // Xoá tất cả task hiện có trong DOM
+        taskListDiv.innerHTML = '';
+
+        // Vẽ lại toàn bộ task với trạng thái mới
+        tasks.forEach(task => {
+            const taskItem = createTaskItem(task.text, task.isCompleted, task.id);
+            taskListDiv.appendChild(taskItem);
+        });
+
+        updateTaskCounts();
+});
+    // 5 Xử lý sự kiện khi nhấn check box và xóa
+    deleteSelect.addEventListener('click', () => {
+        // Lấy checkbox đang được check
+        const completedCheckboxes = document.querySelectorAll('.task-item input[type="checkbox"]:checked');
+
+        completedCheckboxes.forEach((checkbox) => {
+            const taskItem = checkbox.closest('.task-item');
+            const taskId = parseInt(taskItem.dataset.id);
+
+            // Xóa task khỏi mảng tasks
+            tasks = tasks.filter(task => task.id !== taskId);
+
+            // Xóa khỏi DOM
+            taskItem.remove();
+        });
+
+        saveTasksToLocalStorage();
+        updateTaskCounts();
+    });
+    // --- 6. Khởi tạo ứng dụng --
     // Tải các task từ localStorage khi ứng dụng khởi động
     loadTasksFromLocalStorage();
     // Cập nhật số lượng task ban đầu (dựa trên dữ liệu đã tải)

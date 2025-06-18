@@ -35,6 +35,16 @@ form .new-todo{
     border: none;
     border-radius: 5px;
 }
+form .multi-delete {
+    width: 100%;
+    text-align: left;
+    padding: 0 40px;
+}
+form .multi-delete .bin-btn {
+    margin-left: 10px;
+    cursor: pointer;
+    color: red;
+}
 form .new-todo .add-btn {
     padding: 12px;
     margin-left: 5px;

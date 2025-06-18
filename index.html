@@ -5,16 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="todoList.css">
     <title>Todo List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body> 
      <div id="todo-list">
         <h1 class="title">To Do List</h1>
         <form action="" method="get">
+               
                 <div class="new-todo">
                     <input type="text" name="new-todo" id="new-todo" placeholder="Add a new task..." required>
                     <button type="submit" class="add-btn">Add</button>
                 </div>
                 <h3 class="sub-title">Task List</h3>
+                 <div class="multi-delete">
+                    <input type="checkbox" name="check-all" id="check-all">
+                    <i class="fa fa-trash " id="delete-select" aria-hidden="true"></i>
+                </div>
                 <div class="task-list">
                     
                 </div>
